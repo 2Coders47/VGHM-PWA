@@ -1,6 +1,88 @@
-<div class="scanner-container">
-  <video id="qr-video"></video>
-  <div id="qr-result">Čekam kameru...</div>
+<div class="relative h-screen w-screen overflow-hidden bg-black">
+  <!-- Video Background -->
+  <video id="qr-video" class="absolute inset-0 h-full w-full object-cover"
+  ></video>
+
+  <!-- Overlay with Scanner Frame -->
+  <div class="absolute inset-0 z-10 flex flex-col items-center justify-center">
+    <!-- Dark overlay mask effect using box-shadow -->
+    <div
+      class="relative h-72 w-72 rounded-3xl shadow-[0_0_0_9999px_rgba(0,0,0,0.7)]"
+    >
+      <!-- Corner accents -->
+      <div
+        class="absolute left-0 top-0 h-12 w-12 rounded-tl-3xl border-l-4 border-t-4 border-blue-500"
+      >
+      </div>
+      <div
+        class="absolute right-0 top-0 h-12 w-12 rounded-tr-3xl border-r-4 border-t-4 border-blue-500"
+      >
+      </div>
+      <div
+        class="absolute bottom-0 left-0 h-12 w-12 rounded-bl-3xl border-b-4 border-l-4 border-blue-500"
+      >
+      </div>
+      <div
+        class="absolute bottom-0 right-0 h-12 w-12 rounded-br-3xl border-b-4 border-r-4 border-blue-500"
+      >
+      </div>
+
+      <!-- Scanning animation line -->
+      <div
+        class="absolute left-0 top-0 h-full w-full overflow-hidden rounded-3xl"
+      >
+        <div
+          class="h-1 w-full bg-blue-400 shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-scan"
+        >
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-12 text-white/90 font-medium tracking-wide drop-shadow-md">
+      Skeniraj QR kod
+    </p>
+  </div>
+
+  <!-- Result Overlay (Bottom Sheet) -->
+  <div
+    id="qr-result-container"
+    class="absolute bottom-0 left-0 right-0 z-20 translate-y-full transition-transform duration-300 ease-out rounded-t-3xl bg-white p-6 shadow-[0_-5px_20px_rgba(0,0,0,0.2)]"
+  >
+    <div class="mx-auto mb-6 h-1.5 w-12 rounded-full bg-gray-300"></div>
+    <div class="flex items-start gap-4">
+      <div class="rounded-full bg-green-100 p-3 text-green-600">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h3 class="mb-1 text-lg font-bold text-gray-900">Uspješno skenirano</h3>
+        <p
+          id="qr-result"
+          class="break-all text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded-lg border border-gray-100"
+        >
+          ...
+        </p>
+      </div>
+    </div>
+    <button
+      id="scan-again"
+      class="mt-6 w-full rounded-xl bg-blue-600 py-3.5 font-semibold text-white shadow-lg shadow-blue-200 active:scale-[0.98] transition-transform"
+    >
+      Skeniraj novi kod
+    </button>
+  </div>
 </div>
 
 <script>
@@ -8,65 +90,70 @@
 
   const codeReader = new BrowserQRCodeReader()
   const videoElement = document.getElementById("qr-video")
-  const resultElement = document.getElementById("qr-result")
+  const resultContainer = document.getElementById("qr-result-container")
+  const resultText = document.getElementById("qr-result")
+  const scanAgainBtn = document.getElementById("scan-again")
+
+  let isScanning = false
 
   async function startScanning() {
+    if (isScanning) return
+    isScanning = true
+
     try {
       if (!videoElement) {
-        throw new Error("Video element not found")
+        console.error("Video element not found")
+        isScanning = false
+        return
       }
-      // Pokreće skeniranje s prve dostupne kamere
+
       const result = await codeReader.decodeOnceFromVideoDevice(
         undefined,
         videoElement as HTMLVideoElement
       )
 
-      if (resultElement) {
-        resultElement.textContent = `Skenirano: ${result.getText()}`
-        resultElement.classList.add("success")
+      // Show result
+      if (resultText && resultContainer) {
+        resultText.textContent = result.getText()
+        resultContainer.classList.remove("translate-y-full")
       }
-      console.log("QR Result:", result)
+
+      isScanning = false
     } catch (err) {
       console.error(err)
-      if (resultElement) {
-        resultElement.textContent = "Greška ili prekinuto skeniranje."
-      }
+      isScanning = false
     }
   }
 
+  // Initial start
   startScanning()
+
+  // Restart button
+  scanAgainBtn?.addEventListener("click", () => {
+    resultContainer?.classList.add("translate-y-full")
+    startScanning()
+  })
 </script>
 
 <style>
-  .scanner-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+  @keyframes scan {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(18rem);
+      opacity: 0;
+    }
   }
 
-  video {
-    width: 100%;
-    border-radius: 12px;
-    background-color: #000;
-  }
-
-  #qr-result {
-    padding: 1rem;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    width: 100%;
-    text-align: center;
-    font-family: monospace;
-    word-break: break-all;
-  }
-
-  #qr-result.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+  .animate-scan {
+    animation: scan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
 </style>
