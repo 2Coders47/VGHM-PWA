@@ -5,6 +5,8 @@ import react from "@astrojs/react"
 import tailwindcss from "@tailwindcss/vite"
 import AstroPWA from "@vite-pwa/astro"
 
+import vercel from "@astrojs/vercel";
+
 // https://astro.build/config
 export default defineConfig({
   integrations: [react(), AstroPWA()],
@@ -12,4 +14,6 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+
+  adapter: vercel(),
 })
