@@ -160,6 +160,14 @@ export default function QrScanner() {
         playsInline // Required for iOS
       />
 
+      {/* Test Button for Development */}
+      <button
+        onClick={() => handleScan("test")}
+        className="absolute top-4 right-4 z-50 bg-white/10 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/20 transition-colors"
+      >
+        Simuliraj Scan
+      </button>
+
       {/* Overlay with Scanner Frame */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
         {/* Dark overlay mask effect using box-shadow */}
@@ -239,7 +247,7 @@ export default function QrScanner() {
               <div className="h-px bg-gray-200 w-full"></div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">QR Kod</span>
-                <span className="font-mono text-sm font-medium text-gray-900 truncate max-w-[180px]">
+                <span className="font-mono text-sm font-medium text-gray-900 truncate max-w-45">
                   {result.originalCode}
                 </span>
               </div>
