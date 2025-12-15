@@ -1,5 +1,5 @@
 ---
-import QrScanner from "../components/QrScanner.astro"
+import QrScanner from "../components/QrScanner.tsx"
 import Layout from "../layouts/Layout.astro"
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
@@ -7,5 +7,5 @@ import Layout from "../layouts/Layout.astro"
 ---
 
 <Layout>
-  <QrScanner />
+  <QrScanner client:load />
 </Layout>
